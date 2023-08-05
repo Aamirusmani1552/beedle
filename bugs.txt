@@ -1,0 +1,11 @@
+assumed bug lines:
+Lender.sol
+Line 84, 92: unecessary state update at receiver Fee
+
+Line 100: address zero check not done
+Line 116: loan Id check is not done
+Line 198: No checks are done if the amount is zero or not
+Line 300: No checks were done if the Loan with LoanId exists or not
+
+Staking.sol
+Line 38,46, 53: amount zero check is not done
