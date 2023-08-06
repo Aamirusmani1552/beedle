@@ -81,22 +81,18 @@ contract LenderTest is Test {
         });
         bytes32 poolId = lender.setPool(p);
 
-        (, , , , uint256 poolBalance, , , , ) = lender.pools(poolId);
+        (,,,, uint256 poolBalance,,,,) = lender.pools(poolId);
         assertEq(poolBalance, 1000 * 10 ** 18);
 
         vm.startPrank(borrower);
-        Borrow memory b = Borrow({
-            poolId: poolId,
-            debt: 100 * 10 ** 18,
-            collateral: 100 * 10 ** 18
-        });
+        Borrow memory b = Borrow({poolId: poolId, debt: 100 * 10 ** 18, collateral: 100 * 10 ** 18});
         Borrow[] memory borrows = new Borrow[](1);
         borrows[0] = b;
         lender.borrow(borrows);
 
         assertEq(loanToken.balanceOf(address(borrower)), 995 * 10 ** 17);
         assertEq(collateralToken.balanceOf(address(lender)), 100 * 10 ** 18);
-        (, , , , poolBalance, , , , ) = lender.pools(poolId);
+        (,,,, poolBalance,,,,) = lender.pools(poolId);
         assertEq(poolBalance, 900 * 10 ** 18);
     }
 
@@ -116,11 +112,7 @@ contract LenderTest is Test {
         bytes32 poolId = lender.setPool(p);
 
         vm.startPrank(borrower);
-        Borrow memory b = Borrow({
-            poolId: poolId,
-            debt: 99 * 10 ** 18,
-            collateral: 100 * 10 ** 18
-        });
+        Borrow memory b = Borrow({poolId: poolId, debt: 99 * 10 ** 18, collateral: 100 * 10 ** 18});
         Borrow[] memory borrows = new Borrow[](1);
         borrows[0] = b;
         lender.borrow(borrows);
@@ -142,11 +134,7 @@ contract LenderTest is Test {
         bytes32 poolId = lender.setPool(p);
 
         vm.startPrank(borrower);
-        Borrow memory b = Borrow({
-            poolId: poolId,
-            debt: 10000 * 10 ** 18,
-            collateral: 10000 * 10 ** 18
-        });
+        Borrow memory b = Borrow({poolId: poolId, debt: 10000 * 10 ** 18, collateral: 10000 * 10 ** 18});
         Borrow[] memory borrows = new Borrow[](1);
         borrows[0] = b;
 
@@ -156,13 +144,7 @@ contract LenderTest is Test {
     function test_repay() public {
         test_borrow();
 
-        bytes32 poolId = keccak256(
-            abi.encode(
-                address(lender1),
-                address(loanToken),
-                address(collateralToken)
-            )
-        );
+        bytes32 poolId = keccak256(abi.encode(address(lender1), address(loanToken), address(collateralToken)));
 
         vm.startPrank(borrower);
 
@@ -175,7 +157,7 @@ contract LenderTest is Test {
 
         assertEq(loanToken.balanceOf(address(borrower)), 0);
         assertEq(collateralToken.balanceOf(address(lender)), 0);
-        (, , , , uint256 poolBalance, , , , ) = lender.pools(poolId);
+        (,,,, uint256 poolBalance,,,,) = lender.pools(poolId);
         assertEq(poolBalance, 1000 * 10 ** 18);
     }
 
@@ -206,7 +188,7 @@ contract LenderTest is Test {
 
         lender.startAuction(loanIds);
 
-        (, , , , , , , , uint256 startTime, ) = lender.loans(0);
+        (,,,,,,,, uint256 startTime,) = lender.loans(0);
 
         assertEq(startTime, block.timestamp);
     }
@@ -351,27 +333,15 @@ contract LenderTest is Test {
         uint256[] memory loanIds = new uint256[](1);
         loanIds[0] = 0;
         bytes32[] memory poolIds = new bytes32[](1);
-        poolIds[0] = keccak256(
-            abi.encode(
-                address(lender2),
-                address(loanToken),
-                address(collateralToken)
-            )
-        );
+        poolIds[0] = keccak256(abi.encode(address(lender2), address(loanToken), address(collateralToken)));
 
         vm.startPrank(lender1);
         lender.giveLoan(loanIds, poolIds);
 
-        (, , , , uint256 poolBalance, , , , ) = lender.pools(poolIds[0]);
+        (,,,, uint256 poolBalance,,,,) = lender.pools(poolIds[0]);
         assertEq(poolBalance, 900 * 10 ** 18);
-        bytes32 poolId = keccak256(
-            abi.encode(
-                address(lender1),
-                address(loanToken),
-                address(collateralToken)
-            )
-        );
-        (, , , , poolBalance, , , , ) = lender.pools(poolId);
+        bytes32 poolId = keccak256(abi.encode(address(lender1), address(loanToken), address(collateralToken)));
+        (,,,, poolBalance,,,,) = lender.pools(poolId);
         assertEq(poolBalance, 1000 * 10 ** 18);
     }
 
@@ -395,13 +365,7 @@ contract LenderTest is Test {
         vm.startPrank(borrower);
         Refinance memory r = Refinance({
             loanId: 0,
-            poolId: keccak256(
-                abi.encode(
-                    address(lender2),
-                    address(loanToken),
-                    address(collateralToken)
-                )
-            ),
+            poolId: keccak256(abi.encode(address(lender2), address(loanToken), address(collateralToken))),
             debt: 100 * 10 ** 18,
             collateral: 100 * 10 ** 18
         });
@@ -442,16 +406,8 @@ contract LenderTest is Test {
 
         vm.startPrank(borrower);
         // taking loan from the above pool
-        bytes32 poolId = lender.getPoolId(
-            address(lender1),
-            address(loanToken),
-            address(0)
-        );
-        Borrow memory loan1 = Borrow({
-            poolId: poolId,
-            debt: 100 * 10 ** 18,
-            collateral: 50 * 10 ** 18
-        });
+        bytes32 poolId = lender.getPoolId(address(lender1), address(loanToken), address(0));
+        Borrow memory loan1 = Borrow({poolId: poolId, debt: 100 * 10 ** 18, collateral: 50 * 10 ** 18});
         assertEq(poolId, returnedPoolId);
 
         Borrow[] memory borrows = new Borrow[](1);
@@ -481,11 +437,7 @@ contract LenderTest is Test {
 
         vm.startPrank(borrower);
         // taking loan from the above pool
-        Borrow memory loan1 = Borrow({
-            poolId: poolId,
-            debt: 100 * 10 ** 18,
-            collateral: 50 * 10 ** 18
-        });
+        Borrow memory loan1 = Borrow({poolId: poolId, debt: 100 * 10 ** 18, collateral: 50 * 10 ** 18});
 
         Borrow[] memory borrows = new Borrow[](1);
         borrows[0] = loan1;
@@ -493,9 +445,7 @@ contract LenderTest is Test {
         vm.stopPrank();
 
         // another user paying for the loan
-        uint256 borrowerBeforeCollateralBalance = collateralToken.balanceOf(
-            address(borrower)
-        );
+        uint256 borrowerBeforeCollateralBalance = collateralToken.balanceOf(address(borrower));
         address user = makeAddr("user");
         loanToken.mint(user, 120 * 10 ** 18);
         vm.prank(user);
@@ -506,14 +456,10 @@ contract LenderTest is Test {
         lender.repay(repayId);
         vm.stopPrank();
 
-        uint256 borrowerLoanTokenBalance = loanToken.balanceOf(
-            address(borrower)
-        );
-        uint256 borrowerAfterCollateralBalance = collateralToken.balanceOf(
-            address(borrower)
-        );
+        uint256 borrowerLoanTokenBalance = loanToken.balanceOf(address(borrower));
+        uint256 borrowerAfterCollateralBalance = collateralToken.balanceOf(address(borrower));
 
-        console.log(borrowerBeforeCollateralBalance + 50*10**18, borrowerAfterCollateralBalance);
+        console.log(borrowerBeforeCollateralBalance + 50 * 10 ** 18, borrowerAfterCollateralBalance);
         // assertEq(borrowerCollateralBalance, 50 * 10 ** 18);
     }
 }
