@@ -720,6 +720,7 @@ contract Lender is Ownable {
     function _calculateInterest(
         Loan memory l
     ) internal view returns (uint256 interest, uint256 fees) {
+        // use openzeppelin's safemath library for overflow and underflow check
         uint256 timeElapsed = block.timestamp - l.startTimestamp;
         interest = (l.interestRate * l.debt * timeElapsed) / 10000 / 365 days;
         fees = (lenderFee * interest) / 10000;
